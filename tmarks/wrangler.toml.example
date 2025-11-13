@@ -2,28 +2,18 @@ name = "tmarks"
 compatibility_date = "2024-03-18"
 pages_build_output_dir = ".deploy"
 
-# This is the D1 database binding.
-# The 'binding' property is the name of the global variable that will be available in your code.
-# The 'database_name' is the name of the database in the Cloudflare dashboard.
-# The 'database_id' is the unique ID of the database.
 [[d1_databases]]
 binding = "DB"
 database_name = "tmarks-prod-db"
-database_id = "bdfa6639-e25d-4698-ad13-a4f95b8c4aa7"
-
-# KV namespaces
-# 注意: 需要先创建KV命名空间,然后填入正确的ID
-# 创建命令: wrangler kv:namespace create "RATE_LIMIT_KV"
-#          wrangler kv:namespace create "PUBLIC_SHARE_KV"
-# 或者在Cloudflare Dashboard中创建: Workers & Pages → KV → Create a namespace
+database_id = "请替换为实际的D1_ID"
 
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "e0f338978b644876ba26910ec547daee"  # 需要先创建KV命名空间
+id = "请替换为实际的KV_ID"  # 需要先创建KV命名空间
 
 [[kv_namespaces]]
 binding = "PUBLIC_SHARE_KV"
-id = "581d130ccef948d99db96ae246b3c810"  # 需要先创建KV命名空间
+id = "请替换为实际的KV_ID"  # 需要先创建KV命名空间
 
 # Environment variables
 # ⚠️ 安全警告: 敏感信息不应该提交到Git仓库!

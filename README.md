@@ -86,43 +86,44 @@ pnpm dev
 **前置要求:**
 - Cloudflare 账号
 - GitHub 账号
-- 安装 Wrangler CLI: `npm install -g wrangler`
 
-**步骤:**
+**部署步骤:**
 
-1. **Fork 仓库并连接**
+1. **Fork 仓库**
    - Fork 本仓库到你的 GitHub
-   - 登录 [Cloudflare 控制台](https://dash.cloudflare.com/)
+
+2. **创建资源并配置**
+   
+   **a. 在 Cloudflare Dashboard 创建资源：**
+   - 创建D1数据库：`tmarks-prod-db`，记录 ID
+   - 创建KV空间：`RATE_LIMIT_KV`，记录 ID
+   - 创建KV空间：`PUBLIC_SHARE_KV`，记录 ID
+   
+   **b. 在你的 Fork 仓库中配置 wrangler.toml：**
+   - 将 `tmarks/wrangler.toml.example` 重命名为 `tmarks/wrangler.toml`
+   - 编辑文件，将上面记录的资源 ID 填入对应位置
+   - 提交更改
+
+3. **配置环境变量**
+   
+   继续在 Cloudflare Dashboard 操作：
+   - Workers & Pages → 你的项目 → 设置 → 环境变量 → 生产环境
+   - 添加以下变量（生成随机密钥）：
+     - `JWT_SECRET`: 生成一个 48 位随机字符串
+     - `ENCRYPTION_KEY`: 生成一个 48 位随机字符串
+
+4. **初始化数据库**
+   - Workers & Pages → D1 → 打开 `tmarks-prod-db`
+   - 打开 `tmarks/migrations/d1_console_pure.sql` 文件
+   - 复制 SQL 内容并在控制台执行
+
+5. **连接仓库并部署**
    - Workers & Pages → 创建 → 连接到 Git → 选择你的仓库
-
-2. **配置构建**
-   - 根目录: `tmarks`
-   - 构建命令: `pnpm install && pnpm build:deploy`
-   - 构建输出目录: `.deploy`
-
-3. **创建资源**
-   - 创建 D1 数据库: `tmarks-prod-db`
-   - 创建 KV 命名空间: `RATE_LIMIT_KV`
-   - 创建 KV 命名空间: `PUBLIC_SHARE_KV`
-
-4. **配置 wrangler.toml**
-   将上一步的 ID 填入 `tmarks/wrangler.toml`
-
-5. **运行数据库迁移**
-   ```bash
-   # 在 Cloudflare D1 控制台执行 SQL
-   # 文件路径: tmarks/migrations/d1_console_pure.sql
-   # 在控制台直接复制粘贴该文件内容并执行
-   ```
-
-6. **配置环境变量**
-   设置 → 环境变量 → 生产环境:
-   - `JWT_SECRET`: `openssl rand -base64 48`
-   - `ENCRYPTION_KEY`: `openssl rand -base64 48`
-
-7. **重新部署**
-   部署 → 重试部署
-
+   - 配置构建设置：
+     - 根目录: `tmarks`
+     - 构建命令: `pnpm install && pnpm build:deploy`
+     - 构建输出目录: `.deploy`
+   - 保存并部署，等待构建完成
 
 ---
 
