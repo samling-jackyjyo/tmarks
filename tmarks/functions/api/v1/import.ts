@@ -112,19 +112,22 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
  */
 async function parseImportData(format: ImportFormat, content: string) {
   switch (format) {
-    case 'html':
+    case 'html': {
       const htmlParser = createHtmlParser()
       return await htmlParser.parse(content)
+    }
 
-    case 'markdown':
+    case 'markdown': {
       const markdownParser = createMarkdownParser()
       return await markdownParser.parse(content)
+    }
 
     case 'json':
-    case 'tmarks':
+    case 'tmarks': {
       const jsonParser = createJsonParser()
       return await jsonParser.parse(content)
-    
+    }
+
     default:
       throw new Error(`Unsupported import format: ${format}`)
   }
@@ -135,18 +138,21 @@ async function parseImportData(format: ImportFormat, content: string) {
  */
 async function validateImportData(format: ImportFormat, data: any) {
   switch (format) {
-    case 'html':
+    case 'html': {
       const htmlParser = createHtmlParser()
       return await htmlParser.validate(data)
+    }
 
-    case 'markdown':
+    case 'markdown': {
       const markdownParser = createMarkdownParser()
       return await markdownParser.validate(data)
+    }
 
     case 'json':
-    case 'tmarks':
+    case 'tmarks': {
       const jsonParser = createJsonParser()
       return await jsonParser.validate(data)
+    }
 
     default:
       return { valid: false, errors: [{ field: 'format', message: 'Unsupported format' }], warnings: [] }
@@ -338,13 +344,15 @@ async function createBookmark(
       // 恢复已删除的书签
       await db.prepare(
         `UPDATE bookmarks
-         SET title = ?, description = ?,
+         SET title = ?, description = ?, cover_image = ?,
+             is_archived = 0,
              deleted_at = NULL, updated_at = ?
          WHERE id = ?`
       )
         .bind(
           bookmark.title,
           bookmark.description || null,
+          bookmark.cover_image || null,
           now,
           existing.id
         )
@@ -357,16 +365,18 @@ async function createBookmark(
 
       await db.prepare(`
         INSERT INTO bookmarks (
-          id, user_id, title, url, description,
-          is_pinned, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          id, user_id, title, url, description, cover_image,
+          is_pinned, is_archived, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         bookmarkId,
         userId,
         bookmark.title,
         bookmark.url,
         bookmark.description || null,
+        bookmark.cover_image || null,
         false, // 导入的书签默认不置顶
+        false, // 导入的书签默认不归档
         createdAt,
         now
       ).run()
@@ -488,7 +498,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
     const { searchParams } = new URL(context.request.url)
     const format = searchParams.get('format') as ImportFormat
-    const preview = searchParams.get('preview') === 'true'
+    // const preview = searchParams.get('preview') === 'true' // 预留用于未来实现预览功能
 
     if (!format) {
       return new Response(

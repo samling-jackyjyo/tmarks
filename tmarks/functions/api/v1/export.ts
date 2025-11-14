@@ -76,16 +76,18 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     // 根据格式选择导出器
     let result
     switch (format) {
-      case 'json':
+      case 'json': {
         const jsonExporter = createJsonExporter()
         result = await jsonExporter.export(exportData, options)
         break
-      
-      case 'html':
+      }
+
+      case 'html': {
         const htmlExporter = createHtmlExporter()
         result = await htmlExporter.export(exportData, options)
         break
-      
+      }
+
       default:
         return new Response(
           JSON.stringify({ error: `Unsupported export format: ${format}` }),
@@ -151,10 +153,10 @@ async function collectUserData(db: D1Database, userId: string): Promise<TMarksEx
 
     // 获取所有书签
     const { results: bookmarks } = await db.prepare(`
-      SELECT 
-        id, title, url, description, is_pinned, 
+      SELECT
+        id, title, url, description, cover_image, is_pinned,
         created_at, updated_at, click_count, last_clicked_at
-      FROM bookmarks 
+      FROM bookmarks
       WHERE user_id = ? AND deleted_at IS NULL
       ORDER BY created_at DESC
     `).bind(userId).all()
@@ -190,6 +192,7 @@ async function collectUserData(db: D1Database, userId: string): Promise<TMarksEx
       title: bookmark.title,
       url: bookmark.url,
       description: bookmark.description,
+      cover_image: bookmark.cover_image,
       tags: bookmarkTagMap.get(bookmark.id) || [],
       is_pinned: Boolean(bookmark.is_pinned),
       created_at: bookmark.created_at,
