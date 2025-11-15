@@ -207,15 +207,18 @@ export function SortSelector({ value, onChange, className = '' }: SortSelectorPr
           onClick={handleToggle}
           className={`
             w-auto min-w-[120px] sm:min-w-[160px] h-11 px-3 sm:px-4 py-2
-            bg-card border border-border rounded-xl
+            border border-border rounded-xl
             flex items-center justify-between gap-2 sm:gap-3
             text-sm font-medium text-foreground
             transition-all duration-200 ease-out
-            hover:bg-muted hover:border-primary/30
+            hover:border-primary/30
             focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary
             shadow-sm hover:shadow-md
-            ${isOpen ? 'bg-muted border-primary/50 shadow-md' : ''}
+            ${isOpen ? 'border-primary/50 shadow-md' : ''}
           `}
+          style={{
+            backgroundColor: isOpen ? 'var(--muted)' : 'var(--card)',
+          }}
           aria-expanded={isOpen}
           aria-haspopup="listbox"
           aria-label="选择排序方式"

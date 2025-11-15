@@ -196,6 +196,7 @@ export function BookmarksPage() {
       const storedUpdatedAt = getStoredViewModeUpdatedAt()
       const serverUpdatedAt = preferences.updated_at ? new Date(preferences.updated_at).getTime() : 0
 
+      // 优先使用时间戳更新的数据源
       if (!storedMode || serverUpdatedAt > storedUpdatedAt) {
         setViewMode(preferences.view_mode)
         setStoredViewMode(preferences.view_mode, serverUpdatedAt)

@@ -5,15 +5,28 @@ import { ApiError } from '@/lib/api-client'
 
 export const PREFERENCES_QUERY_KEY = 'preferences'
 
+// 从 localStorage 获取视图模式
+function getStoredViewMode(): 'list' | 'card' | 'minimal' | 'title' | null {
+  if (typeof window === 'undefined') return null
+  const stored = window.localStorage.getItem('tmarks:view_mode')
+  const validModes = ['list', 'card', 'minimal', 'title']
+  return stored && validModes.includes(stored) ? (stored as any) : null
+}
+
 // 默认偏好设置
-const DEFAULT_PREFERENCES: UserPreferences = {
-  theme: 'light',
-  page_size: 30,
-  view_mode: 'list',
-  density: 'normal',
-  tag_layout: 'grid',
-  sort_by: 'popular',
-  updated_at: new Date().toISOString(),
+function getDefaultPreferences(): UserPreferences {
+  // 优先使用 localStorage 中的视图模式
+  const storedViewMode = getStoredViewMode()
+
+  return {
+    theme: 'light',
+    page_size: 30,
+    view_mode: storedViewMode || 'list',  // 使用 localStorage 中的值
+    density: 'normal',
+    tag_layout: 'grid',
+    sort_by: 'popular',
+    updated_at: new Date().toISOString(),
+  }
 }
 
 /**
@@ -26,10 +39,10 @@ export function usePreferences() {
       try {
         return await preferencesService.getPreferences()
       } catch (error) {
-        // 如果接口返回 404,使用默认偏好设置
+        // 如果接口返回 404,使用默认偏好设置(包含 localStorage 中的视图模式)
         if (error instanceof ApiError && error.status === 404) {
-          console.warn('Preferences API not found, using default preferences')
-          return DEFAULT_PREFERENCES
+          console.warn('Preferences API not found, using default preferences with localStorage view mode')
+          return getDefaultPreferences()
         }
         throw error
       }
@@ -60,5 +73,12 @@ export function useUpdatePreferences() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [PREFERENCES_QUERY_KEY] })
     },
+    onError: (error) => {
+      // 静默处理错误,不影响用户体验
+      // 偏好设置已经保存到 localStorage,即使服务器更新失败也不影响使用
+      console.warn('Failed to update preferences on server, but local changes are saved:', error)
+    },
+    // 失败时不重试,避免频繁请求
+    retry: false,
   })
 }
